@@ -93,3 +93,9 @@ python server.py
 - 前端逻辑：`script.js`（调用 `/api/furigana` 并渲染注音）
 - 样式：`style.css`
 
+## 许可与数据来源
+
+- 代码：遵循各依赖的开源许可（Flask BSD/MIT，SudachiPy Apache-2.0 等）。
+- 词典数据：本项目使用 EDRDG 的 JMdict 与 KANJIDIC2 数据，按 CC BY-SA 4.0 许可使用与分发；我们对数据做了格式转换/裁剪。
+  - EDRDG: https://www.edrdg.org/
+  - CC BY-SA 4.0: https://creativecommons.org/licenses/by-sa/4.0/
