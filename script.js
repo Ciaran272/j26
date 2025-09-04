@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const clearBtn = document.getElementById('clear-btn');
     const toggleKatakana = document.getElementById('toggle-katakana');
     const toggleMultiIndicator = document.getElementById('toggle-multi-indicator');
-    const API_URL = "/api/furigana";
+    const API_URL = "https://zforest.onrender.com/api/furigana";
 
     convertBtn.addEventListener('click', async () => {
         const inputText = lyricsInput.value;
