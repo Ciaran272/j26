@@ -1,7 +1,7 @@
 # 日语平假名注音器
 
-网页地址 https://ciaran272.github.io/j26/
-一个为日语文本（本人主要自用于日语歌词）自动生成平假名注音的小工具，支持多音字候选、片假名→平假名即时切换。
+网页版 https://ciaran272.github.io/j26/（首次加载后端会略久）
+一个为日语文本（自用于日语歌词）自动生成平假名注音的小工具，支持多音字候选、片假名→平假名即时切换。
 
 - 分词/读音：Sudachi + `sudachidict-full`
 - 多音字：结合上下文、白名单与外部词典（JMdict/Kanjidic2，可选）
@@ -19,7 +19,7 @@ requirements.txt
 start.bat
 ```
 
-## 快速开始（Windows）
+## 本地版（Windows）
 
 1) 双击 `start.bat`
 - 创建并激活虚拟环境 `.venv`
@@ -70,9 +70,9 @@ python server.py
 - 说明：
   - 对空白和标点保持原样
   - 纯片假名且长度>1 的词是否显示注音由 `katakana` 控制（即时切换）
-  - 本项目不依赖 KenLM 与 UniDic，可直接运行
 
-## 常见问题（FAQ）
+
+## 常见问题
 
 - Q: 首次安装很久？
   - A: `sudachidict-full` 体积较大，下载时间较长属正常现象。
@@ -86,10 +86,9 @@ python server.py
 - Q: 我能不用 `full` 字典吗？
   - A: 可以改为 `sudachidict-core`，安装更快，但覆盖较少。你的场景推荐继续使用 `full`。
 
-## 维护与开发
+## 
 
 - 后端入口：`server.py`（Flask + Sudachi）
 - 前端逻辑：`script.js`（调用 `/api/furigana` 并渲染注音）
 - 样式：`style.css`
 
-若需新增功能（如导出、批量处理、更多语言释义），欢迎提出需求或继续迭代。
