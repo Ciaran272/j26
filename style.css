@@ -1,0 +1,288 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&display=swap');
+
+body {
+    background: linear-gradient(to bottom, #87CEEB, #FFFACD);
+    font-family: 'Noto Sans JP', sans-serif; 
+    color: #333; 
+    display: flex;
+    justify-content: center; 
+    align-items: center; 
+    min-height: 100vh;
+    margin: 0; 
+    padding: 20px;
+}
+
+.container {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 30px; 
+    border-radius: 20px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    width: 100%; 
+    max-width: 800px;
+    text-align: center; 
+    position: relative;
+    overflow: visible;
+}
+
+header h1 { color: #008B8B; margin-bottom: 10px; }
+header p { color: #555; font-size: 1.1em; }
+
+.input-area { margin: 30px 0; }
+
+#lyrics-input {
+    width: 100%; 
+    height: 150px; 
+    padding: 15px;
+    border: 2px dashed #008B8B; 
+    border-radius: 10px;
+    font-size: 1em; 
+    resize: vertical; 
+    box-sizing: border-box;
+    background-color: #fff;
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M11 7L7 11" stroke="%23A9A9A9" stroke-width="1.5" stroke-linecap="round"/><path d="M11 10L10 11" stroke="%23A9A9A9" stroke-width="1.5" stroke-linecap="round"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 5px bottom 5px;
+}
+
+.options-area {
+    margin: 15px 0;
+    text-align: left;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.option-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95em;
+    color: #444;
+    cursor: pointer;
+}
+
+.option-checkbox input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.option-checkbox span {
+    user-select: none;
+}
+
+.button-group {
+    display: flex; 
+    justify-content: flex-end;
+    gap: 10px; 
+    margin-top: 20px;
+}
+
+#convert-btn, .secondary-btn {
+    padding: 12px 25px;
+    border: none; 
+    border-radius: 25px; 
+    font-size: 1.1em; 
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    color: white;
+}
+
+#convert-btn {
+    background-color: #FF6347;
+}
+
+#convert-btn:hover { 
+    background-color: #FF4500; 
+    transform: scale(1.05); 
+}
+
+.secondary-btn {
+    background-color: #b0c4de;
+}
+
+.secondary-btn:hover { 
+    background-color: #778899; 
+    transform: scale(1.05); 
+}
+
+.output-area { text-align: left; }
+
+#output-title-input {
+    background: transparent; 
+    border: none; 
+    outline: none; 
+    font-size: 1.5em;
+    font-weight: bold; 
+    color: #333; 
+    width: 100%; 
+    padding: 5px;
+    box-sizing: border-box; 
+    margin-bottom: 15px;
+    border-bottom: 2px solid transparent; 
+    transition: border-bottom 0.3s;
+}
+
+#output-title-input:focus { 
+    border-bottom: 2px solid #008B8B; 
+}
+
+.lyrics-container {
+    background-color: #F0F8FF; 
+    padding: 20px; 
+    border-radius: 10px;
+    min-height: 100px; 
+    font-size: 1.3em; 
+    overflow-x: auto;
+    overflow-y: visible; /* 确保菜单不会被裁剪 */
+    position: relative; /* 为绝对定位的菜单提供定位上下文 */
+}
+
+.lyrics-container p {
+    white-space: nowrap; 
+    margin: 0;
+    line-height: 2.8; 
+}
+
+.lyrics-container p:empty { height: 1.7em; }
+
+.word-unit {
+    display: inline-block;
+    margin: 0 0.3em;
+    vertical-align: baseline;
+    position: relative;
+    line-height: 1;
+}
+
+.stack { 
+    display: inline-block; 
+    vertical-align: baseline; 
+    text-align: center; 
+}
+
+.ruby-wrap { line-height: 1; }
+
+.okurigana { 
+    line-height: 1; 
+    padding-left: 0.05em; 
+}
+
+ruby {
+    ruby-position: over;
+    ruby-align: center;
+    line-height: 1;
+}
+
+ruby rt { 
+    font-size: 0.7em;
+    color: #FF4500;
+    white-space: nowrap;
+    text-align: center; 
+}
+
+footer { margin-top: 30px; color: #9aa6b2; font-size: 0.9em; }
+
+/* 移除未使用的可爱装饰与动画样式 */
+
+/* 多音字相关样式 */
+.multi-reading {
+    position: relative;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background-color 0.2s ease;
+}
+
+.multi-reading:hover {
+    background-color: rgba(255, 69, 0, 0.1);
+}
+
+.multi-indicator {
+    font-size: 0.6em;
+    color: #FF4500;
+    margin-left: 2px;
+    opacity: 0.7;
+    line-height: 1;
+    display: inline-block;
+    vertical-align: baseline;
+    transform: translateY(0.15em); /* 让指示器更贴近基字右下 */
+    transition: opacity 0.2s ease;
+}
+
+.multi-reading:hover .multi-indicator {
+    opacity: 1;
+}
+
+.reading-menu {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 4px 0;
+    min-width: 60px;
+    font-size: 0.9em;
+    animation: menuFadeIn 0.2s ease-out;
+}
+
+.reading-option {
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.reading-option:last-child {
+    border-bottom: none;
+}
+
+.reading-option:hover {
+    background-color: #f8f8f8;
+}
+
+.reading-option.current {
+    background-color: #e8f4f8;
+    color: #008B8B;
+    font-weight: bold;
+}
+
+.reading-option.current:hover {
+    background-color: #d0e8f0;
+}
+
+/* 移除音/训标记样式 */
+
+/* 多音字标记全局开关：当 body 挂载 .hide-multi-indicator 时隐藏倒三角，但不影响交互区域 */
+body.hide-multi-indicator .multi-indicator {
+    display: none !important;
+}
+
+@keyframes menuFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 待生成注音的样式 */
+.pending-generation {
+    color: #888;
+    font-style: italic;
+    background-color: rgba(255, 193, 7, 0.1);
+    padding: 2px 4px;
+    border-radius: 3px;
+    border: 1px dashed #ffc107;
+    font-size: 0.9em;
+}
+
+@media (min-width: 1024px) {
+    .lyrics-container { overflow-x: visible; }
+    body { display: block; }
+    .container { 
+        max-width: none; 
+        width: max-content; 
+        margin: 20px auto; 
+    }
+}

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>平假名注音器</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>日语平假名注音器</h1>
+            <p>Sudachi&Kanjidic2/JMdict词典，支持长文本</p>
+        </header>
+        <main>
+            <div class="input-area">
+                <textarea id="lyrics-input" placeholder="可按段落输入日语歌词..."></textarea>
+                <div class="options-area">
+                    <label class="option-checkbox">
+                        <input type="checkbox" id="toggle-katakana" checked />
+                        <span>片假名转换</span>
+                    </label>
+                    <label class="option-checkbox">
+                        <input type="checkbox" id="toggle-multi-indicator" />
+                        <span>多音字标记</span>
+                    </label>
+                </div>
+                <div style="display:flex;justify-content:flex-end;align-items:center;margin-top:10px;gap:10px;">
+                    <div class="button-group">
+                        <button id="clear-btn" class="secondary-btn">清空</button>
+                        <button id="convert-btn">生成注音</button>
+                    </div>
+                </div>
+            </div>
+            <div class="output-area">
+                <input type="text" id="output-title-input" value="标题" />
+                <div id="lyrics-output" class="lyrics-container"></div>
+            </div>
+        </main>
+        <footer>机器也会犯错，请核查歌词信息</footer>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
