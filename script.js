@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         convertBtn.disabled = true;
         convertBtn.textContent = '生成中...';
-        lyricsOutput.innerHTML = '请稍候...';
+        lyricsOutput.innerHTML = '等待后端加载（首次略慢）';
         
         try {
             const response = await fetch(API_URL, {
@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 片假名转换复选框的即时切换功能
     toggleKatakana.addEventListener('change', () => {
         // 只有在已经有输出结果时才重新处理
-        if (lyricsOutput.innerHTML.trim() !== '' && !lyricsOutput.textContent.includes('请稍候') && !lyricsOutput.textContent.includes('处理失败')) {
+        if (lyricsOutput.innerHTML.trim() !== '' && !lyricsOutput.textContent.includes('等待后端加载（首次略慢）') && !lyricsOutput.textContent.includes('处理失败')) {
             toggleKatakanaDisplay(toggleKatakana.checked);
         }
     });
@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clearTimeout(inputChangeTimeout);
         inputChangeTimeout = setTimeout(() => {
             // 只有在已经有输出结果时才同步更新
-            if (lyricsOutput.innerHTML.trim() !== '' && !lyricsOutput.textContent.includes('请稍候') && !lyricsOutput.textContent.includes('处理失败')) {
+            if (lyricsOutput.innerHTML.trim() !== '' && !lyricsOutput.textContent.includes('等待后端加载（首次略慢）') && !lyricsOutput.textContent.includes('处理失败')) {
                 syncLyricsFormat();
             }
         }, 500); // 500ms 延迟，避免用户输入时频繁触发
