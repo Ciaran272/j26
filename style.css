@@ -138,6 +138,13 @@ header p { color: #555; font-size: 1.1em; }
     position: relative; /* 为绝对定位的菜单提供定位上下文 */
 }
 
+/* 加载提示：缩小字号以适配单行显示 */
+.loading-hint {
+    font-size: 0.8em;
+    color: #667085;
+    white-space: nowrap;
+}
+
 .lyrics-container p {
     white-space: nowrap; 
     margin: 0;
