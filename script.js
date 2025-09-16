@@ -641,8 +641,9 @@ document.addEventListener('DOMContentLoaded', () => {
             font-family: 'Noto Sans JP', sans-serif;
             box-sizing: border-box;
             min-height: 400px;
-            width: auto;
-            display: inline-block;
+            width: 900px;
+            max-width: 900px;
+            display: block;
         `;
         
         // 添加标题
@@ -655,6 +656,10 @@ document.addEventListener('DOMContentLoaded', () => {
             margin-bottom: 30px;
             padding-bottom: 20px;
             border-bottom: 2px solid #008B8B;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-width: 820px;
+            width: 100%;
         `;
         titleDiv.textContent = title;
         
@@ -665,8 +670,9 @@ document.addEventListener('DOMContentLoaded', () => {
             font-size: 1.3em;
             line-height: 2.8;
             color: #333;
-            width: auto;
-            display: inline-block;
+            width: 100%;
+            max-width: 820px;
+            display: block;
         `;
         
         // 设置导出时的ruby样式
@@ -687,12 +693,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 line-height: 1;
             }
             .export-container p {
-                margin: 0 0 10px 0;
+                margin: 0 0 15px 0;
                 line-height: 2.8;
-                white-space: nowrap;
-                overflow: visible;
-                display: inline-block;
-                width: auto;
+                white-space: normal;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                max-width: 820px;
+                width: 100%;
+                display: block;
             }
             .export-container p:empty {
                 height: 1.7em;
@@ -703,6 +711,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 vertical-align: baseline;
                 position: relative;
                 line-height: 1;
+                word-break: keep-all;
             }
             .export-container .stack {
                 display: inline-block;
@@ -724,54 +733,14 @@ document.addEventListener('DOMContentLoaded', () => {
         document.head.appendChild(style);
         document.body.appendChild(exportContainer);
         
-        // 自动检测内容宽度并进行缩放调整
-        const targetWidth = 900; // 目标宽度
+        // 等待布局完成
+        await new Promise(resolve => setTimeout(resolve, 100));
         
-        // 测量标题宽度
-        const titleWidth = titleDiv.scrollWidth;
+        // 获取最终的容器尺寸（不再进行缩放，使用固定宽度和自动换行）
+        const finalWidth = 900;
+        const finalHeight = Math.max(400, exportContainer.scrollHeight);
         
-        // 测量每行歌词的宽度，找到最宽的行
-        const paragraphs = lyricsDiv.querySelectorAll('p');
-        let maxLyricsWidth = 0;
-        
-        paragraphs.forEach(p => {
-            if (p.textContent.trim()) { // 跳过空行
-                const pWidth = p.scrollWidth;
-                if (pWidth > maxLyricsWidth) {
-                    maxLyricsWidth = pWidth;
-                }
-            }
-        });
-        
-        // 取标题和歌词中的最大宽度，加上padding
-        const actualContentWidth = Math.max(titleWidth, maxLyricsWidth);
-        const actualWidth = actualContentWidth + 80; // 加上左右padding (40px * 2)
-        
-        let scaleRatio = 1;
-        let finalWidth = Math.max(targetWidth, actualWidth);
-        let finalHeight = Math.max(400, exportContainer.scrollHeight + 80);
-        
-        if (actualWidth > targetWidth) {
-            // 内容超宽，需要缩放
-            scaleRatio = targetWidth / actualWidth;
-            console.log(`内容过宽 (实际:${actualWidth}px，目标:${targetWidth}px)，应用缩放比例: ${scaleRatio.toFixed(3)}`);
-            
-            // 应用缩放变换
-            exportContainer.style.transform = `scale(${scaleRatio})`;
-            exportContainer.style.transformOrigin = 'top left';
-            
-            // 调整容器尺寸以适应缩放后的内容
-            finalWidth = targetWidth;
-            finalHeight = Math.max(400, exportContainer.scrollHeight * scaleRatio + 80);
-            
-            // 设置容器的实际尺寸
-            exportContainer.style.width = `${actualWidth}px`;
-        } else {
-            // 内容宽度正常，不需要缩放
-            exportContainer.style.width = `${actualWidth}px`;
-            finalWidth = actualWidth;
-            console.log(`内容宽度正常 (${actualWidth}px)，无需缩放`);
-        }
+        console.log(`导出图片尺寸: ${finalWidth}x${finalHeight}px（使用自动换行，保持段落结构）`);
         
         try {
             // 使用html2canvas生成高清图片
