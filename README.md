@@ -1,6 +1,7 @@
-# 日语歌平假名注音器
+# 日语歌平假名注音
 
 （网页版） https://ciaran272.github.io/j26/
+-(备用)https://j26.pages.dev/
 -后端首次加载会比较久
 
 - 分词/读音：Sudachi + `sudachidict-full`
@@ -27,7 +28,7 @@ start.bat
 - 启动 Flask 服务
 
 2) 浏览器访问 `http://127.0.0.1:5000/`
-- 在文本框粘贴日语文本，支持长文本，可按段落排列
+- 在歌词分节输入，支持长文本，
 - 点击“生成注音”获取结果
 
 ## 手动启动（可选）
@@ -76,11 +77,11 @@ python server.py
 
 - `sudachidict-full` 体积较大，下载时间较长属正常现象。
 
-- : 确认终端中 `server.py` 正在运行且无错误；刷新页面重试。
+- 确认终端中 `server.py` 正在运行且无错误；刷新页面重试。
 
-- : 可以改为 `sudachidict-core`，安装更快，但覆盖较少。推荐使用 `full`。
+- 可以改为 `sudachidict-core`，安装更快，但覆盖较少。推荐使用 `full`。
 
-## 
+## 架构说明
 
 - 后端入口：`server.py`（Flask + Sudachi）
 - 前端逻辑：`script.js`（调用 `/api/furigana` 并渲染注音）

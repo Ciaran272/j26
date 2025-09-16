@@ -14,7 +14,6 @@ tokenizer_obj = dictionary.Dictionary(dict_type="full").create()
 
 # 可选：外部多音字库（Kanjidic2 等清单转 json 后放置于项目根目录）
 KANJI_READINGS_PATH = os.path.join(os.path.dirname(__file__), 'kanji_readings.json')
-EN_KANA_DICT_PATH = os.path.join(os.path.dirname(__file__), 'english_kana.json')
 try:
     with open(KANJI_READINGS_PATH, 'r', encoding='utf-8') as _f:
         EXTERNAL_KANJI_READINGS = json.load(_f)
@@ -22,16 +21,6 @@ try:
             EXTERNAL_KANJI_READINGS = {}
 except Exception:
     EXTERNAL_KANJI_READINGS = {}
-
-try:
-    with open(EN_KANA_DICT_PATH, 'r', encoding='utf-8') as _f:
-        ENGLISH_KANA_DICT = json.load(_f)
-        if not isinstance(ENGLISH_KANA_DICT, dict):
-            ENGLISH_KANA_DICT = {}
-except Exception:
-    ENGLISH_KANA_DICT = {}
-
-ENG_KANA_MODE = os.getenv('ENG_KANA_MODE', 'auto')  # auto|g2p|wordlist|simple
 
 # 外部词典：JMdict/EDICT 与 Kanjidic2（请预处理为 JSON 映射）
 JMDICT_PATH = os.getenv('JMDICT_JSON', os.path.join(os.path.dirname(__file__), 'jmdict_readings.json'))
@@ -195,133 +184,6 @@ def should_skip_alternatives(pos0: str, surface: str) -> bool:
         return True
     return False
 
-# --- 英文单词 -> かな 的简易回退 ---
-_VOWELS = ['a','e','i','o','u']
-_ROW_KATA = {
-    'k': ['カ','ケ','キ','コ','ク'],  # 将索引按 a,e,i,o,u 顺序映射
-    's': ['サ','セ','シ','ソ','ス'],
-    't': ['タ','テ','チ','ト','ツ'],
-    'n': ['ナ','ネ','ニ','ノ','ヌ'],
-    'h': ['ハ','ヘ','ヒ','ホ','フ'],
-    'm': ['マ','メ','ミ','モ','ム'],
-    'y': ['ヤ','イェ','イ','ヨ','ユ'],
-    'r': ['ラ','レ','リ','ロ','ル'],
-    'l': ['ラ','レ','リ','ロ','ル'],
-    'w': ['ワ','ウェ','ウィ','ウォ','ウ'],
-    'g': ['ガ','ゲ','ギ','ゴ','グ'],
-    'z': ['ザ','ゼ','ジ','ゾ','ズ'],
-    'd': ['ダ','デ','ヂ','ド','ヅ'],
-    'b': ['バ','ベ','ビ','ボ','ブ'],
-    'p': ['パ','ペ','ピ','ポ','プ'],
-    'f': ['ファ','フェ','フィ','フォ','フ'],
-    'v': ['ヴァ','ヴェ','ヴィ','ヴォ','ヴ'],
-    'j': ['ジャ','ジェ','ジ','ジョ','ジュ'],
-    'c': ['カ','セ','シ','コ','ク'],
-}
-_V_KATA = {'a':'ア','e':'エ','i':'イ','o':'オ','u':'ウ'}
-_DIGRAPH = {
-    'tion':'ション','sion':'ジョン','ch':'チ','sh':'シ','th':'ス','ph':'フ','wh':'ウ','ck':'ック','ng':'ング','qu':'ク','ts':'ツ'
-}
-
-def english_to_katakana(word: str) -> str:
-    s = re.sub(r"[^A-Za-z]","", word or "")
-    if not s:
-        return ""
-    s = s.lower()
-    out = []
-    i = 0
-    # 尾部规则
-    if s.endswith('ing'):
-        s = s[:-3] + 'ing'  # 保持
-    while i < len(s):
-        # digraphs
-        matched = False
-        for L in (5,4,3,2):
-            if i+L <= len(s):
-                chunk = s[i:i+L]
-                if chunk in _DIGRAPH:
-                    out.append(_DIGRAPH[chunk])
-                    i += L
-                    matched = True
-                    break
-        if matched:
-            continue
-        ch = s[i]
-        # 末尾 er → アー
-        if ch == 'e' and i == len(s)-2 and s.endswith('er'):
-            out.append('アー')
-            break
-        # 元音
-        if ch in _VOWELS:
-            kat = _V_KATA[ch]
-            # 连续元音视为长音
-            j = i+1
-            while j < len(s) and s[j] in _VOWELS:
-                j += 1
-            if j - i >= 2:
-                out.append(kat + 'ー')
-                i = j
-                continue
-            out.append(kat)
-            i += 1
-            continue
-        # 子音 + 元音
-        if i+1 < len(s) and s[i+1] in _VOWELS:
-            row = _ROW_KATA.get(ch)
-            if row:
-                v = s[i+1]
-                idx = _VOWELS.index(v)
-                out.append(row[idx])
-                i += 2
-                continue
-        # 促音（子音重叠）
-        if i+1 < len(s) and s[i] == s[i+1] and s[i] not in _VOWELS and s[i] != 'n':
-            out.append('ッ')
-            i += 1
-            continue
-        # 单独子音
-        # 用行的ウ列兜底
-        row = _ROW_KATA.get(ch)
-        if row:
-            out.append(row[4])
-        elif ch == 'x':
-            out.append('クス')
-        elif ch == 'q':
-            out.append('ク')
-        elif ch == 'n':
-            out.append('ン')
-        i += 1
-    katakana = ''.join(out)
-    return katakana
-
-def english_to_hiragana(word: str) -> str:
-    # 1) 词表优先（可维护高质量词条）
-    if ENGLISH_KANA_DICT:
-        key = (word or '').lower()
-        kana = ENGLISH_KANA_DICT.get(key)
-        if kana:
-            return katakana_to_hiragana(kana)
-
-    mode = ENG_KANA_MODE
-    # 2) 预留 g2p 管道（如安装 g2p-en / phonemizer 可在此接入）
-    if mode in ('auto','g2p'):
-        try:
-            # 占位：若未来接入 g2p-en，可在此把 english -> IPA -> katakana
-            pass
-        except Exception:
-            pass
-
-    # 3) 简易规则回退
-    kat = english_to_katakana(word)
-    return katakana_to_hiragana(kat)
-
-def english_wordlist_to_hiragana(word: str) -> str:
-    """仅使用本地词表进行英→かな转换；未命中则返回空。"""
-    key = (word or '').lower()
-    kana = ENGLISH_KANA_DICT.get(key) if ENGLISH_KANA_DICT else None
-    return katakana_to_hiragana(kana) if kana else ""
-
-# 已弃用：旧版多音候选收集函数（保留在历史中）。
 
 def get_alternative_readings_with_primary(surface, primary_reading, tokenizer_obj, context):
     """获取多音字选项，特殊处理某些容易误读的词汇"""
@@ -743,9 +605,9 @@ def get_furigana():
                 else:
                     if reading and reading != "*":
                         reading_hiragana = katakana_to_hiragana(reading)
-                        # 若 Sudachi 的 reading 仍是拉丁字母或与原文一致，则视为无有效读音，回退英→かな
-                        if re.fullmatch(r"[A-Za-z]+", surface or "") and (reading.lower() == surface.lower() or re.fullmatch(r"[A-Za-z]+", reading or "")):
-                            reading_hiragana = english_to_hiragana(surface)
+                        # 若表面形式为英文（包括带空格的词组），则不进行注音
+                        if re.fullmatch(r"[A-Za-z\s]+", surface or ""):
+                            reading_hiragana = ""
                         # 助詞/助動詞/補助記号/純ひらがな：不出多音菜单
                         if should_skip_alternatives(pos[0], surface):
                             alternative_readings = []
@@ -886,16 +748,11 @@ def get_furigana():
                             except Exception:
                                 pass
                     else:
-                        # Sudachi 无读音：仅当英文在本地词表命中时才转换，未命中则不注音
-                        if re.fullmatch(r"[A-Za-z]+", surface):
-                            reading_hiragana = english_wordlist_to_hiragana(surface)
-                        else:
-                            reading_hiragana = ""
+                        # Sudachi 无读音：不对英文单词进行注音
+                        reading_hiragana = ""
             
-            # 最后保障：若仍无读音且为英文字母词，执行英→かな回退
-            if (not reading_hiragana) and re.fullmatch(r"[A-Za-z]+", surface or ""):
-                # 最后保障：仍仅词表驱动，未命中则留空
-                reading_hiragana = english_wordlist_to_hiragana(surface)
+            # 最后保障：英文单词不进行假名转换，保持无读音状态
+            # 已移除英文转换功能
             
             line_result.append({
                 "surface": surface,

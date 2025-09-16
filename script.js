@@ -3,9 +3,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const lyricsInput = document.getElementById('lyrics-input');
     const lyricsOutput = document.getElementById('lyrics-output');
     const clearBtn = document.getElementById('clear-btn');
+    const exportBtn = document.getElementById('export-btn');
     const toggleKatakana = document.getElementById('toggle-katakana');
-    const toggleMultiIndicator = document.getElementById('toggle-multi-indicator');
-    const API_URL = "https://zforest.onrender.com/api/furigana";
+    const toggleLongpressEdit = document.getElementById('toggle-longpress-edit');
+    // 根据环境选择API地址
+    const API_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+        ? "http://127.0.0.1:5000/api/furigana"
+        : "https://zforest.onrender.com/api/furigana";
 
     convertBtn.addEventListener('click', async () => {
         const inputText = lyricsInput.value;
@@ -51,12 +55,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     let wordHtml = `<span class="word-unit${multiReadClass}"${alternativesData}${currentReadingData}><span class="stack">`;
                     if (result.rt) {
                         wordHtml += `<span class="ruby-wrap"><ruby><rb>${result.baseMain}</rb><rt class="reading-text">${result.rt}</rt></ruby>`;
-                        // 指示器放在基字右下（位于 ruby-wrap 内）
-                        if (hasAlternatives) { wordHtml += `<span class="multi-indicator">▼</span>`; }
                         wordHtml += `</span>`;
                     } else {
                         wordHtml += `<span class="ruby-wrap"><ruby><rb>${result.baseMain}</rb></ruby>`;
-                        if (hasAlternatives) { wordHtml += `<span class="multi-indicator">▼</span>`; }
                         wordHtml += `</span>`;
                     }
                     if (result.suffix) {
@@ -75,6 +76,8 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // 为多音字单词添加交互事件
             setupMultiReadingInteraction();
+            // 为注音添加长按编辑功能
+            setupLongpressEditInteraction();
         } catch (error) {
             console.error("请求失败:", error);
             lyricsOutput.textContent = `处理失败，请确保后端服务器正在运行。错误: ${error.message}`;
@@ -88,6 +91,28 @@ document.addEventListener('DOMContentLoaded', () => {
         lyricsInput.value = '';
         lyricsOutput.innerHTML = '';
     });
+
+    // 导出图片功能
+    exportBtn.addEventListener('click', async () => {
+        // 检查是否有内容可以导出
+        if (lyricsOutput.innerHTML.trim() === '') {
+            alert('请先生成注音内容再导出图片');
+            return;
+        }
+
+        exportBtn.disabled = true;
+        exportBtn.textContent = '导出中...';
+
+        try {
+            await exportToImage();
+        } catch (error) {
+            console.error('导出图片失败:', error);
+            alert('导出图片失败，请重试');
+        } finally {
+            exportBtn.disabled = false;
+            exportBtn.textContent = '导出图片';
+        }
+    });
     
     // 片假名转换复选框的即时切换功能
     toggleKatakana.addEventListener('change', () => {
@@ -97,17 +122,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 多音字标记的即时切换：仅隐藏/显示倒三角，不影响交互
-    if (toggleMultiIndicator) {
-        const applyIndicatorToggle = (show) => {
-            document.body.classList.toggle('hide-multi-indicator', !show);
-        };
-        // 初始状态
-        applyIndicatorToggle(toggleMultiIndicator.checked);
-        toggleMultiIndicator.addEventListener('change', () => {
-            applyIndicatorToggle(toggleMultiIndicator.checked);
-        });
-    }
+    // 长按修改选项的变化监听
+    toggleLongpressEdit.addEventListener('change', () => {
+        // 切换body的CSS类以控制样式
+        document.body.classList.toggle('longpress-edit-enabled', toggleLongpressEdit.checked);
+        
+        // 当选项变化时重新设置长按编辑交互
+        if (lyricsOutput.innerHTML.trim() !== '' && !lyricsOutput.textContent.includes('后端启动中（首次较慢）') && !lyricsOutput.textContent.includes('处理失败')) {
+            setupLongpressEditInteraction();
+        }
+    });
     
     // 输入框内容变化的即时同步功能
     let inputChangeTimeout;
@@ -306,6 +330,110 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(`用户选择了新读音: ${element.querySelector('rb').textContent} -> ${newReading}`);
     }
     
+    // 长按编辑功能
+    function setupLongpressEditInteraction() {
+        if (!toggleLongpressEdit.checked) return;
+        
+        const readingElements = document.querySelectorAll('.reading-text');
+        
+        readingElements.forEach(element => {
+            let longPressTimer;
+            let isLongPress = false;
+            
+            // 鼠标按下开始计时
+            element.addEventListener('mousedown', (e) => {
+                if (e.button !== 0) return; // 只响应左键
+                
+                isLongPress = false;
+                longPressTimer = setTimeout(() => {
+                    isLongPress = true;
+                    enterEditMode(element);
+                }, 1000); // 1秒长按
+                
+                e.preventDefault(); // 防止选中文本
+            });
+            
+            // 鼠标抬起取消计时
+            element.addEventListener('mouseup', (e) => {
+                clearTimeout(longPressTimer);
+            });
+            
+            // 鼠标离开取消计时
+            element.addEventListener('mouseleave', (e) => {
+                clearTimeout(longPressTimer);
+            });
+            
+            // 防止点击事件与长按冲突
+            element.addEventListener('click', (e) => {
+                if (isLongPress) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            });
+        });
+    }
+    
+    function enterEditMode(readingElement) {
+        // 检查是否已经在编辑模式
+        if (readingElement.classList.contains('editing')) return;
+        
+        const originalText = readingElement.textContent;
+        
+        // 创建输入框
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = originalText;
+        input.className = 'reading-editor';
+        
+        // 隐藏原文本并插入输入框
+        readingElement.style.display = 'none';
+        readingElement.classList.add('editing');
+        readingElement.parentNode.insertBefore(input, readingElement.nextSibling);
+        
+        // 聚焦并选中文本
+        input.focus();
+        input.select();
+        
+        // 处理完成编辑的事件
+        const finishEdit = () => {
+            const newText = input.value.trim();
+            
+            // 只有在用户输入了有效内容且与原文不同时才更新
+            if (newText && newText !== originalText) {
+                readingElement.textContent = newText;
+                // 更新对应的word-unit的数据属性
+                const wordUnit = readingElement.closest('.word-unit');
+                if (wordUnit) {
+                    wordUnit.dataset.currentReading = newText;
+                }
+                console.log(`用户修改注音: ${originalText} -> ${newText}`);
+            } else if (!newText) {
+                // 如果输入框为空，保持原来的注音不变
+                console.log(`用户取消修改注音，保持原注音: ${originalText}`);
+            }
+            
+            // 恢复原状态
+            readingElement.style.display = '';
+            readingElement.classList.remove('editing');
+            input.remove();
+        };
+        
+        // 回车完成编辑
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                finishEdit();
+            } else if (e.key === 'Escape') {
+                // ESC 取消编辑
+                readingElement.style.display = '';
+                readingElement.classList.remove('editing');
+                input.remove();
+            }
+        });
+        
+        // 失去焦点完成编辑
+        input.addEventListener('blur', finishEdit);
+    }
+    
     // 片假名转换即时切换功能
     function toggleKatakanaDisplay(showKatakanaReading) {
         const allWordUnits = document.querySelectorAll('.word-unit');
@@ -409,6 +537,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // 重新设置多音字交互
         setupMultiReadingInteraction();
+        // 重新设置长按编辑交互
+        setupLongpressEditInteraction();
     }
     
     // 从段落元素中提取纯文本内容
@@ -471,9 +601,6 @@ document.addEventListener('DOMContentLoaded', () => {
                                 wordHtml += `<span class="okurigana">${result.suffix}</span>`;
                             }
                             
-                            if (hasAlternatives) {
-                                wordHtml += `<span class="multi-indicator">▼</span>`;
-                            }
                             
                             wordHtml += `</span></span>`;
                             
@@ -492,6 +619,187 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // 重新设置多音字交互
         setupMultiReadingInteraction();
+        // 重新设置长按编辑交互
+        setupLongpressEditInteraction();
+    }
+    
+    // 导出图片功能实现
+    async function exportToImage() {
+        // 获取标题和歌词内容
+        const titleElement = document.getElementById('output-title-input');
+        const lyricsElement = document.getElementById('lyrics-output');
+        const title = titleElement.value || '标题';
+        
+        // 创建导出专用的容器
+        const exportContainer = document.createElement('div');
+        exportContainer.style.cssText = `
+            position: fixed;
+            top: -10000px;
+            left: 0;
+            background: white;
+            padding: 40px;
+            font-family: 'Noto Sans JP', sans-serif;
+            box-sizing: border-box;
+            min-height: 400px;
+            width: auto;
+            display: inline-block;
+        `;
+        
+        // 添加标题
+        const titleDiv = document.createElement('div');
+        titleDiv.style.cssText = `
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #008B8B;
+        `;
+        titleDiv.textContent = title;
+        
+        // 复制歌词内容
+        const lyricsDiv = document.createElement('div');
+        lyricsDiv.innerHTML = lyricsElement.innerHTML;
+        lyricsDiv.style.cssText = `
+            font-size: 1.3em;
+            line-height: 2.8;
+            color: #333;
+            width: auto;
+            display: inline-block;
+        `;
+        
+        // 设置导出时的ruby样式
+        const style = document.createElement('style');
+        style.textContent = `
+            .export-container ruby {
+                ruby-position: over;
+                ruby-align: center;
+                line-height: 1;
+            }
+            .export-container ruby rt {
+                font-size: 0.7em;
+                color: #FF4500;
+                white-space: nowrap;
+                text-align: center;
+            }
+            .export-container ruby rb {
+                line-height: 1;
+            }
+            .export-container p {
+                margin: 0 0 10px 0;
+                line-height: 2.8;
+                white-space: nowrap;
+                overflow: visible;
+                display: inline-block;
+                width: auto;
+            }
+            .export-container p:empty {
+                height: 1.7em;
+            }
+            .export-container .word-unit {
+                display: inline-block;
+                margin: 0 0.3em;
+                vertical-align: baseline;
+                position: relative;
+                line-height: 1;
+            }
+            .export-container .stack {
+                display: inline-block;
+                vertical-align: baseline;
+                text-align: center;
+            }
+            .export-container .ruby-wrap {
+                line-height: 1;
+            }
+            .export-container .okurigana {
+                line-height: 1;
+                padding-left: 0.05em;
+            }
+        `;
+        
+        exportContainer.className = 'export-container';
+        exportContainer.appendChild(titleDiv);
+        exportContainer.appendChild(lyricsDiv);
+        document.head.appendChild(style);
+        document.body.appendChild(exportContainer);
+        
+        // 自动检测内容宽度并进行缩放调整
+        const targetWidth = 900; // 目标宽度
+        
+        // 测量标题宽度
+        const titleWidth = titleDiv.scrollWidth;
+        
+        // 测量每行歌词的宽度，找到最宽的行
+        const paragraphs = lyricsDiv.querySelectorAll('p');
+        let maxLyricsWidth = 0;
+        
+        paragraphs.forEach(p => {
+            if (p.textContent.trim()) { // 跳过空行
+                const pWidth = p.scrollWidth;
+                if (pWidth > maxLyricsWidth) {
+                    maxLyricsWidth = pWidth;
+                }
+            }
+        });
+        
+        // 取标题和歌词中的最大宽度，加上padding
+        const actualContentWidth = Math.max(titleWidth, maxLyricsWidth);
+        const actualWidth = actualContentWidth + 80; // 加上左右padding (40px * 2)
+        
+        let scaleRatio = 1;
+        let finalWidth = Math.max(targetWidth, actualWidth);
+        let finalHeight = Math.max(400, exportContainer.scrollHeight + 80);
+        
+        if (actualWidth > targetWidth) {
+            // 内容超宽，需要缩放
+            scaleRatio = targetWidth / actualWidth;
+            console.log(`内容过宽 (实际:${actualWidth}px，目标:${targetWidth}px)，应用缩放比例: ${scaleRatio.toFixed(3)}`);
+            
+            // 应用缩放变换
+            exportContainer.style.transform = `scale(${scaleRatio})`;
+            exportContainer.style.transformOrigin = 'top left';
+            
+            // 调整容器尺寸以适应缩放后的内容
+            finalWidth = targetWidth;
+            finalHeight = Math.max(400, exportContainer.scrollHeight * scaleRatio + 80);
+            
+            // 设置容器的实际尺寸
+            exportContainer.style.width = `${actualWidth}px`;
+        } else {
+            // 内容宽度正常，不需要缩放
+            exportContainer.style.width = `${actualWidth}px`;
+            finalWidth = actualWidth;
+            console.log(`内容宽度正常 (${actualWidth}px)，无需缩放`);
+        }
+        
+        try {
+            // 使用html2canvas生成高清图片
+            const canvas = await html2canvas(exportContainer, {
+                scale: 3, // 3倍分辨率，确保高清
+                backgroundColor: '#ffffff',
+                useCORS: true,
+                allowTaint: true,
+                width: finalWidth,
+                height: finalHeight,
+                scrollX: 0,
+                scrollY: 0,
+                logging: false
+            });
+            
+            // 创建下载链接
+            const link = document.createElement('a');
+            link.download = `${title}_注音歌词_${new Date().getFullYear()}${(new Date().getMonth() + 1).toString().padStart(2, '0')}${new Date().getDate().toString().padStart(2, '0')}.png`;
+            link.href = canvas.toDataURL('image/png', 1.0);
+            link.click();
+            
+            console.log('图片导出成功');
+            
+        } finally {
+            // 清理临时元素
+            document.body.removeChild(exportContainer);
+            document.head.removeChild(style);
+        }
     }
     
     // 点击页面其他地方时隐藏菜单

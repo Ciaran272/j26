@@ -78,7 +78,7 @@ header p { color: #555; font-size: 1.1em; }
     margin-top: 20px;
 }
 
-#convert-btn, .secondary-btn {
+#convert-btn, .secondary-btn, .export-btn {
     padding: 12px 25px;
     border: none; 
     border-radius: 25px; 
@@ -88,11 +88,11 @@ header p { color: #555; font-size: 1.1em; }
     color: white;
 }
 
-#convert-btn {
+#convert-btn, .export-btn {
     background-color: #FF6347;
 }
 
-#convert-btn:hover { 
+#convert-btn:hover, .export-btn:hover { 
     background-color: #FF4500; 
     transform: scale(1.05); 
 }
@@ -189,7 +189,6 @@ ruby rt {
 
 footer { margin-top: 30px; color: #9aa6b2; font-size: 0.9em; }
 
-/* 移除未使用的可爱装饰与动画样式 */
 
 /* 多音字相关样式 */
 .multi-reading {
@@ -204,20 +203,9 @@ footer { margin-top: 30px; color: #9aa6b2; font-size: 0.9em; }
 }
 
 .multi-indicator {
-    font-size: 0.6em;
-    color: #FF4500;
-    margin-left: 2px;
-    opacity: 0.7;
-    line-height: 1;
-    display: inline-block;
-    vertical-align: baseline;
-    transform: translateY(0.15em); /* 让指示器更贴近基字右下 */
-    transition: opacity 0.2s ease;
+    display: none !important; /* 永久隐藏多音字标记 */
 }
 
-.multi-reading:hover .multi-indicator {
-    opacity: 1;
-}
 
 .reading-menu {
     background: white;
@@ -255,12 +243,7 @@ footer { margin-top: 30px; color: #9aa6b2; font-size: 0.9em; }
     background-color: #d0e8f0;
 }
 
-/* 移除音/训标记样式 */
 
-/* 多音字标记全局开关：当 body 挂载 .hide-multi-indicator 时隐藏倒三角，但不影响交互区域 */
-body.hide-multi-indicator .multi-indicator {
-    display: none !important;
-}
 
 @keyframes menuFadeIn {
     from {
@@ -282,6 +265,39 @@ body.hide-multi-indicator .multi-indicator {
     border-radius: 3px;
     border: 1px dashed #ffc107;
     font-size: 0.9em;
+}
+
+/* 长按编辑相关样式 */
+.reading-text {
+    transition: background-color 0.2s ease;
+}
+
+/* 只有在开启长按编辑时才显示可编辑样式 */
+body.longpress-edit-enabled .reading-text {
+    cursor: pointer;
+}
+
+body.longpress-edit-enabled .reading-text:hover {
+    background-color: rgba(255, 69, 0, 0.05);
+    border-radius: 2px;
+}
+
+.reading-editor {
+    font-size: 0.7em;
+    color: #FF4500;
+    background: #fff;
+    border: 1px solid #FF4500;
+    border-radius: 3px;
+    padding: 1px 3px;
+    outline: none;
+    min-width: 20px;
+    text-align: center;
+    font-family: inherit;
+}
+
+.reading-editor:focus {
+    background: #fff8f0;
+    box-shadow: 0 0 3px rgba(255, 69, 0, 0.3);
 }
 
 @media (min-width: 1024px) {
