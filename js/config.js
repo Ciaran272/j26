@@ -13,8 +13,7 @@ const resolveApiUrl = () => {
             return 'http://127.0.0.1:5000/api/furigana';
         }
     }
-    // TODO: 部署到Render后，将下面的占位域名替换为真实的 Render 服务地址
-    return 'https://your-render-service.onrender.com/api/furigana';
+    return 'https://zforest.onrender.com/api/furigana';
 };
 
 export const CONFIG = {
