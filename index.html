@@ -6,26 +6,48 @@
     <title>平假名注音</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body data-theme="light">
     <div class="container">
+        <button id="theme-toggle" class="theme-toggle" aria-label="切换主题" title="切换主题">
+            <span class="icon sun-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1.5" x2="12" y2="4"></line>
+                    <line x1="12" y1="20" x2="12" y2="22.5"></line>
+                    <line x1="4" y1="12" x2="1.5" y2="12"></line>
+                    <line x1="22.5" y1="12" x2="20" y2="12"></line>
+                    <line x1="5.64" y1="5.64" x2="3.75" y2="3.75"></line>
+                    <line x1="20.25" y1="20.25" x2="18.36" y2="18.36"></line>
+                    <line x1="5.64" y1="18.36" x2="3.75" y2="20.25"></line>
+                    <line x1="20.25" y1="3.75" x2="18.36" y2="5.64"></line>
+                </svg>
+            </span>
+            <span class="icon moon-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"></path>
+                </svg>
+            </span>
+        </button>
         <header>
             <h1>平假名注音</h1>
-            <p>词典：EDRDG的Sudachi&Kanjidic2</p>
         </header>
         <main>
             <div class="input-area">
-                <textarea id="lyrics-input" placeholder="按歌词分节输入 支持长文本..."></textarea>
-                <div class="options-area">
-                    <label class="option-checkbox">
-                        <input type="checkbox" id="toggle-katakana" checked />
-                        <span>片假名转换</span>
-                    </label>
-                    <label class="option-checkbox">
-                        <input type="checkbox" id="toggle-longpress-edit" />
-                        <span>长按修改</span>
-                    </label>
+                <div class="textarea-wrapper">
+                    <textarea id="lyrics-input" placeholder="按段落输入 支持长文本..."></textarea>
+                    <div class="blinking-cursor"></div>
                 </div>
-                <div style="display:flex;justify-content:flex-end;align-items:center;margin-top:10px;gap:10px;">
+                <div class="options-and-buttons-area">
+                    <div class="options-group">
+                        <label class="option-checkbox">
+                            <input type="checkbox" id="toggle-katakana" checked />
+                            <span>片假名转换</span>
+                        </label>
+                        <label class="option-checkbox">
+                            <input type="checkbox" id="toggle-longpress-edit" checked />
+                            <span>长按修改</span>
+                        </label>
+                    </div>
                     <div class="button-group">
                         <button id="export-btn" class="export-btn">导出图片</button>
                         <button id="clear-btn" class="secondary-btn">清空</button>
@@ -40,10 +62,11 @@
         </main>
         <footer>
             仅供参考，请核查词语信息<br>
-            <small>遵循各依赖的开源许可  按 CC BY-SA 4.0 许可使用与分发</small>
+            词典：EDRDG的Sudachi&Kanjidic2
         </footer>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="script.js"></script>
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>
+
