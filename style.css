@@ -630,6 +630,23 @@ body[data-theme="dark"].longpress-edit-enabled .reading-text:hover {
     background-color: rgba(62, 46, 118, 0.25);
 }
 
+/* 移动端：禁用文本选择和长按菜单，避免与长按编辑冲突 */
+@media (max-width: 768px) {
+    body.longpress-edit-enabled #output,
+    body.longpress-edit-enabled .lyrics-output,
+    body.longpress-edit-enabled .reading-text,
+    body.longpress-edit-enabled .word-unit,
+    body.longpress-edit-enabled ruby,
+    body.longpress-edit-enabled rt {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none; /* iOS 禁用长按弹出菜单 */
+        -webkit-tap-highlight-color: transparent; /* 移除点击高亮 */
+    }
+}
+
 .reading-editor {
     font-size: 0.7em;  /* 与注音大小一致 */
     color: var(--primary-text);
