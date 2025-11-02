@@ -282,9 +282,6 @@ export class ExporterService {
                 white-space: nowrap;
                 text-align: center;
                 font-weight: 500;
-                position: relative;
-                left: 50%;
-                transform: translateX(-50%);
             }
             .export-container ruby rb {
                 display: ruby-base;
