@@ -22,34 +22,38 @@ export class LongpressEditorManager {
         readingElements.forEach(element => {
             let longPressTimer;
             let isLongPress = false;
+            let touchMoved = false;
 
             const isEnabled = () => this.state.settings.longpressEdit;
             
-            // 鼠标按下开始计时
-            const handleMouseDown = (e) => {
-                if (!isEnabled() || e.button !== 0) return; // 未启用或非左键
-
+            // 开始长按（鼠标或触摸）
+            const startLongPress = (e) => {
+                if (!isEnabled()) return;
+                
                 isLongPress = false;
+                touchMoved = false;
+                
                 longPressTimer = setTimeout(() => {
-                    if (!isEnabled()) {
+                    if (!isEnabled() || touchMoved) {
                         return;
                     }
                     isLongPress = true;
                     this.enterEditMode(element);
                 }, CONFIG.LONG_PRESS_DURATION);
                 
-                e.preventDefault(); // 防止选中文本
+                // 阻止默认行为（文本选择、上下文菜单）
+                e.preventDefault();
             };
             
-            // 鼠标抬起取消计时
-            const handleMouseUp = () => {
+            // 结束长按
+            const endLongPress = () => {
                 if (!isEnabled()) return;
                 clearTimeout(longPressTimer);
             };
             
-            // 鼠标离开取消计时
-            const handleMouseLeave = () => {
-                if (!isEnabled()) return;
+            // 触摸移动时取消长按
+            const handleTouchMove = () => {
+                touchMoved = true;
                 clearTimeout(longPressTimer);
             };
             
@@ -62,10 +66,29 @@ export class LongpressEditorManager {
                 }
             };
             
-            element.addEventListener('mousedown', handleMouseDown);
-            element.addEventListener('mouseup', handleMouseUp);
-            element.addEventListener('mouseleave', handleMouseLeave);
+            // 阻止移动端上下文菜单
+            const preventContextMenu = (e) => {
+                if (!isEnabled()) return;
+                e.preventDefault();
+                return false;
+            };
+            
+            // 鼠标事件（桌面端）
+            element.addEventListener('mousedown', (e) => {
+                if (e.button === 0) startLongPress(e);
+            });
+            element.addEventListener('mouseup', endLongPress);
+            element.addEventListener('mouseleave', endLongPress);
+            
+            // 触摸事件（移动端）
+            element.addEventListener('touchstart', startLongPress, { passive: false });
+            element.addEventListener('touchend', endLongPress);
+            element.addEventListener('touchcancel', endLongPress);
+            element.addEventListener('touchmove', handleTouchMove, { passive: false });
+            
+            // 通用事件
             element.addEventListener('click', handleClick);
+            element.addEventListener('contextmenu', preventContextMenu);
         });
     }
     
