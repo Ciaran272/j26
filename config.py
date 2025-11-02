@@ -29,7 +29,6 @@ class Config:
         'KANJIDIC2_JSON',
         os.path.join(BASE_DIR, 'kanjidic2_readings.json')
     )
-    KANJI_READINGS_PATH: str = os.path.join(BASE_DIR, 'kanji_readings.json')
     MODERN_OVERRIDES_PATH: str = os.getenv(
         'MODERN_OVERRIDES',
         os.path.join(BASE_DIR, 'modern_overrides.json')
