@@ -29,14 +29,11 @@ class DictionaryService:
         self.kanjidic2_readings = self._load_dictionary(
             config.KANJIDIC2_PATH, "Kanjidic2"
         )
-        self.kanji_readings = self._load_dictionary(
-            config.KANJI_READINGS_PATH, "Kanji Readings"
-        )
+        # kanji_readings 已合并到 kanjidic2_readings 中，不再单独加载
         self._load_phrase_overrides()
         
         logger.info(f"词典加载完成: JMdict={len(self.jmdict_readings)}, "
-                   f"Kanjidic2={len(self.kanjidic2_readings)}, "
-                   f"Kanji={len(self.kanji_readings)}")
+                   f"Kanjidic2={len(self.kanjidic2_readings)}")
     
     def _load_dictionary(self, path: str, name: str) -> Dict:
         """
@@ -101,7 +98,10 @@ class DictionaryService:
         return self.kanjidic2_readings.get(kanji)
     
     def get_kanji_readings(self, kanji: str) -> List[str]:
-        """获取单字的多音读音"""
+        """
+        获取单字的多音读音
+        注：kanji_readings 已废弃，改用内置多音字字典
+        """
         return self.kanji_readings.get(kanji, [])
     
     def get_phrase_override(self, surface: str) -> Optional[List[str]]:
