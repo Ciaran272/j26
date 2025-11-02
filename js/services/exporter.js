@@ -269,14 +269,11 @@ export class ExporterService {
                 height: 3.2em;
             }
             .export-container ruby {
-                display: ruby;
                 ruby-position: over;
                 ruby-align: center;
                 line-height: 1;
-                position: relative;
             }
             .export-container ruby rt {
-                display: ruby-text;
                 font-size: 0.7em;
                 color: ${baseRubyColor} !important;
                 white-space: nowrap;
@@ -284,8 +281,6 @@ export class ExporterService {
                 font-weight: 500;
             }
             .export-container ruby rb {
-                display: ruby-base;
-                line-height: 1;
                 color: ${baseTextColor} !important;
             }
             .export-container .word-unit {
