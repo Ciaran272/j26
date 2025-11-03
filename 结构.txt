@@ -6,8 +6,8 @@
 ├── config.py                       # 配置管理类
 ├── requirements.txt                # Python 依赖
 │
-├──  jmdict_readings.json            # JMdict 词典数据（日语词汇读音库）
-├──  kanjidic2_readings.json         # Kanjidic2 词典数据（汉字读音库）
+├──  jmdict_readings.json            # JMdict 词典数据
+├──  kanjidic2_readings.json         # Kanjidic2 词典数据
 │
 │
 ├── 📂 api/                            # API 路由层（RESTful 接口）
@@ -41,4 +41,5 @@
 │
 └── 📂 utils/                          #  后端工具模块
     ├── kana_converter.py              # 片假名/平假名转换（保留送假名格式）
+
     └── text_processor.py              # 片假名统一转换（保留格式处理）
