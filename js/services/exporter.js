@@ -275,14 +275,15 @@ export class ExporterService {
                 line-height: 1;
             }
             .export-container .export-ruby-stack {
-                display: inline-grid;
-                grid-auto-flow: row;
-                grid-template-rows: auto auto;
-                justify-items: center;
-                align-items: center;
+                display: inline-block;
+                vertical-align: baseline;
+                text-align: center;
                 line-height: 1;
                 min-width: 0;
-                vertical-align: baseline;
+            }
+            .export-container .export-ruby-stack > span {
+                display: block;
+                line-height: 1;
             }
             .export-container .export-ruby-rt {
                 font-size: 0.7em;
@@ -290,14 +291,13 @@ export class ExporterService {
                 white-space: nowrap;
                 text-align: center;
                 font-weight: 500;
-                display: inline-block;
-                transform: translateY(-0.05em);
+                margin-bottom: 0.15em;
             }
             .export-container .export-ruby-rb {
                 color: ${baseTextColor} !important;
                 text-align: center;
                 line-height: 1;
-                display: inline-block;
+                white-space: nowrap;
             }
             .export-container ruby rt {
                 font-size: 0.7em;
