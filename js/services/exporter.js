@@ -97,6 +97,7 @@ export class ExporterService {
         const lyricsDiv = document.createElement('div');
         lyricsDiv.innerHTML = lyricsElement.innerHTML;
         lyricsDiv.style.cssText = themeStyles.lyrics;
+        this._normalizeRubyMarkup(lyricsDiv);
         
         // 样式
         const style = document.createElement('style');
@@ -273,6 +274,27 @@ export class ExporterService {
                 ruby-align: center;
                 line-height: 1;
             }
+            .export-container .export-ruby-stack {
+                display: inline-flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: flex-start;
+                line-height: 1;
+                min-width: 0;
+            }
+            .export-container .export-ruby-rt {
+                font-size: 0.7em;
+                color: ${baseRubyColor} !important;
+                white-space: nowrap;
+                text-align: center;
+                font-weight: 500;
+                margin-bottom: 0.1em;
+            }
+            .export-container .export-ruby-rb {
+                color: ${baseTextColor} !important;
+                text-align: center;
+                line-height: 1;
+            }
             .export-container ruby rt {
                 font-size: 0.7em;
                 color: ${baseRubyColor} !important;
@@ -313,6 +335,31 @@ export class ExporterService {
         `;
     }
     
+    _normalizeRubyMarkup(root) {
+        const rubies = root.querySelectorAll('ruby');
+        rubies.forEach(ruby => {
+            const base = ruby.querySelector('rb');
+            const reading = ruby.querySelector('rt');
+
+            const stack = document.createElement('span');
+            stack.className = 'export-ruby-stack';
+
+            if (reading) {
+                const readingSpan = document.createElement('span');
+                readingSpan.className = 'export-ruby-rt reading-text';
+                readingSpan.textContent = reading.textContent;
+                stack.appendChild(readingSpan);
+            }
+
+            const baseSpan = document.createElement('span');
+            baseSpan.className = 'export-ruby-rb';
+            baseSpan.textContent = base ? base.textContent : ruby.textContent;
+            stack.appendChild(baseSpan);
+
+            ruby.replaceWith(stack);
+        });
+    }
+
     /**
      * 设置导出状态
      */
